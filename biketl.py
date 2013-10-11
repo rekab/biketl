@@ -2,7 +2,10 @@
 """Stitch together timelapse images with a Garmin track.
 
 Draws graphs of Garmin data (speed, HR, cadence, elevation) along with a Google
-map of position (updated every 10th of a mile).
+map of position (updated every 10th of a mile). Google Maps has some very
+aggressive rate limits, which means this script has to sleep _a lot_ and
+frequently fail.  Fortunately, files are staged, and it can pick up where it
+left off.
 
 Relies on the EXIF data from the timelapse files to match the track up with the
 images.
@@ -28,9 +31,11 @@ import tempfile
 import time
 import urllib2
 
-sys.path.append('/home/james/code/biketl/python-fitparse')
-sys.path.append('/home/james/code/biketl/motionless/motionless')
-sys.path.append('/home/james/code/biketl/exif-py')
+ROOT = os.path.dirname(sys.argv[0])
+sys.path.append(os.path.join(ROOT, 'python-fitparse'))
+sys.path.append(os.path.join(ROOT, 'python-fitparse'))
+sys.path.append(os.path.join(ROOT, 'motionless'))
+sys.path.append(os.path.join(ROOT, 'exif-py'))
 
 
 from fitparse import activity
@@ -45,7 +50,7 @@ SEMICIRCLE_RATIO = 180.0/(2**31)
 MS_TO_MPH_RATIO = 2.23694
 METERS_TO_MILES_RATIO = 0.000621371
 METERS_TO_FEET_RATIO = 3.28084
-FONT_PATH = '/home/james/code/biketl/zekton.otf'
+#FONT_PATH = '/home/james/code/biketl/zekton.otf'
 NUM_GRAPH_POINTS=100
 
 
@@ -205,11 +210,11 @@ def GetMapForPoints(output_dir, file_basename, points, mapdelay=3):
 def DrawSpeedLabel(speed, ax):
   if speed > 25:
     font = font_manager.FontProperties(size=14,
-        weight='bold',
-        fname=FONT_PATH)
+        weight='bold')
+        #fname=FONT_PATH)
   else:
-    font = font_manager.FontProperties(size=14,
-        fname=FONT_PATH)
+    font = font_manager.FontProperties(size=14)
+        #fname=FONT_PATH)
   desc = ('%.1f MPH' % speed).rjust(8)
   # I dislike that pyplot is global, it impinges my customary design.
   pyplot.text(0, .90, desc, transform=ax.transAxes, fontproperties=font, color='white')
@@ -219,24 +224,24 @@ def DrawHeartRateLabel(hr, ax):
   color = 'white'
   if hr > 165:
     desc = ('%d BPM' % hr).rjust(7)
-    font = font_manager.FontProperties(size=14, weight = 'bold',
-      fname=FONT_PATH)
+    font = font_manager.FontProperties(size=14, weight = 'bold')
+      #fname=FONT_PATH)
     color = 'red'
   else:
     desc = 'Heart Rate (BPM)'
-    font = font_manager.FontProperties(size=14, fname=FONT_PATH)
+    font = font_manager.FontProperties(size=14) #, fname=FONT_PATH)
 
   pyplot.text(0, .90, desc, transform=ax.transAxes, fontproperties=font, color=color)
 
 
 def GetFontPropertiesForGrade(grade):
-  return font_manager.FontProperties(size=14,
-      fname=FONT_PATH)
+  return font_manager.FontProperties(size=14)
+      #fname=FONT_PATH)
 
 
 def GetFontPropertiesForCadence(cadence):
-  return font_manager.FontProperties(size=14,
-      fname=FONT_PATH)
+  return font_manager.FontProperties(size=14)
+      #fname=FONT_PATH)
 
 def GetPointForLabel(points):
   """Get a point every few seconds, so that numbers are readable."""
@@ -334,10 +339,11 @@ def CompositeImages(pic_fname, gmap_fname, graph_fname, msg_bar_str, output_fnam
              '-fill "#0008" '
              '-draw "rectangle 0,630,1024,665" '
              '-fill "#cccccc" '
-             '-font %s '
+             #'-font %s '
              '-pointsize 24 '
              '-annotate +10+655 "%s" '
-             '%s') % (tmpfile, FONT_PATH, msg_bar_str, tmpfile)
+             '%s') % (tmpfile, #FONT_PATH,
+                 msg_bar_str, tmpfile)
   Run(cmd_str, log='adding status bar (mileage and time)')
 
   # Composite the tempfile with the graph
