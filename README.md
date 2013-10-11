@@ -23,6 +23,6 @@ https://www.youtube.com/watch?v=Y1VTvU5xEFM
 
 PRE-REQS
 --------
-  sudo apt-get install python-matplotlib
-  sudo apt-get install imagemagick
-  sudo apt-get install mencoder
+    sudo apt-get install python-matplotlib
+    sudo apt-get install imagemagick
+    sudo apt-get install mencoder
