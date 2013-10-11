@@ -1,0 +1,9 @@
+[submodule "python-fitparse"]
+	path = python-fitparse
+	url = https://github.com/dtcooper/python-fitparse.git
+[submodule "motionless"]
+	path = motionless
+	url = https://github.com/ryancox/motionless.git
+[submodule "exif-py"]
+	path = exif-py
+	url = https://github.com/ianare/exif-py.git
